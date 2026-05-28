@@ -187,7 +187,7 @@ main{max-width:780px;margin:0 auto;padding:20px}
         <div class="ctrl-hint">⬆ remove espaço branco do topo</div>
       </div>
       <div class="ctrl-group">
-        <label>Cortar Rodapé</label>
+        <label>Portar Rodapé</label>
         <div class="ctrl-row">
           <input type="range" id="img-bot" min="0" max="55" step="1" value="0"
             oninput="updateCtrlVal('img-bot-val',this.value+'%');applyDisplay()">
@@ -441,12 +441,24 @@ async function parseControlePDF(file) {
 //  MATCH CONTROLE → ORDERS
 // ═══════════════════════════════════════════════════════════════
 function matchControle(orders, controle) {
-  for (const o of orders) {
-    const shipNum = o.info.shipNum; // e.g. "12857803633"
-    const matched = controle.find(c =>
-      c.packId && c.packId.includes(shipNum)
-    );
-    if (matched) o.controle = matched;
+  // Primary: positional match — ZPL order #N → controle entry #N
+  // (the PDF and TXT always list orders in the same sequence)
+  orders.forEach((o, idx) => {
+    if (controle[idx]) o.controle = controle[idx];
+  });
+
+  // Fallback: if positional didn't work (e.g. counts differ),
+  // try matching by shipNum inside packId
+  const unmatched = orders.filter(o => !o.controle);
+  if (unmatched.length && unmatched.length === orders.length) {
+    for (const o of orders) {
+      const shipNum = o.info.shipNum;
+      if (!shipNum) continue;
+      const matched = controle.find(c =>
+        c.packId && c.packId.includes(shipNum)
+      );
+      if (matched) o.controle = matched;
+    }
   }
 }
 
@@ -519,8 +531,6 @@ async function rerender() {
 
 // ═══════════════════════════════════════════════════════════════
 //  LABELARY RENDERING  (timeout 7s para não travar a UI)
-// ═550
-//  LABELARY RENDERING  (timeout 7s para não travar a UI)
 // ═══════════════════════════════════════════════════════════════
 async function renderZPL(zpl, width = 4, height = 8, dpmm = 8) {
   try {
@@ -586,7 +596,7 @@ async function renderOrders() {
   document.getElementById('ctrl-card').classList.add('show');
   setSt(`${orders.length} pedido(s) encontrado(s). Carregando etiquetas…`, 'info');
 
-  // ─-- 1. Cria todos os cards IMEDIATAMENTE (sem aguardar Labelary) ──
+  // ── 1. Cria todos os cards IMEDIATAMENTE (sem aguardar Labelary) ──
   orders.forEach((o, idx) => {
     const { info, controle: ctrl, danfeInfo } = o;
     const chave = danfeInfo?.chave || '';
@@ -633,7 +643,7 @@ async function renderOrders() {
       ${prodHtml}
       <div class="actions">
         <button class="btn btn-ml" onclick="printOrder(${idx})">🖨️ Imprimir</button>
-        <button class="btn btn-sec" onclick="dlFile(orders[${idx}].shipping.raw,'envio-pedido${idx+1}.tat')">⬇ TXT Envio</button>
+        <button class="btn btn-sec" onclick="dlFile(orders[${idx}].shipping.raw,'envio-pedido${idx+1}.txt')">⬇ TXT Envio</button>
         ${o.danfe ? `<button class="btn btn-sec" onclick="dlFile(orders[${idx}].danfe.raw,'danfe-pedido${idx+1}.txt')">⬇ TXT DANFE</button>` : ''}
         <button class="btn btn-out" onclick="dlFile(orders[${idx}].shipping.raw+(orders[${idx}].danfe?orders[${idx}].danfe.raw:''),'pedido${idx+1}-completo.txt')">⬇ TXT Completo</button>
       </div>`;
@@ -800,20 +810,4 @@ document.getElementById('pf').addEventListener('change', e => {
 
 function setupDrop(zoneId, handler) {
   const zone = document.getElementById(zoneId);
-  ['dragover','dragleave','drop'].forEach(ev => {
-    zone.addEventListener(ev, e => {
-      e.preventDefault();
-      if (ev === 'dragover') zone.classList.add('drag');
-      if (ev === 'dragleave') zone.classList.remove('drag');
-      if (ev === 'drop' && e.dataTransfer.files[0]) {
-        zone.classList.remove('drag');
-        handler(e.dataTransfer.files[0]);
-      }
-    });
-  });
-}
-setupDrop('tz', handleTXT);
-setupDrop('pz', handlePDF);
-</script>
-</body>
-</html>
+ 
