@@ -100,7 +100,7 @@ main{max-width:780px;margin:0 auto;padding:20px}
 .btn-sec{background:#f0f0f0;color:#444}
 .btn-out{background:transparent;border:1.5px solid var(--border);color:#555}
 
-/* ── CONTROLES DE TAMANHO ── */
+/* ── CONTROLES DE EXIBIÇÃO ── */
 .ctrl-card{background:var(--card);border-radius:12px;padding:16px 18px;margin-bottom:14px;
   border:1px solid var(--border);box-shadow:0 1px 5px rgba(0,0,0,.05);display:none}
 .ctrl-card.show{display:block}
@@ -110,16 +110,17 @@ main{max-width:780px;margin:0 auto;padding:20px}
 .ctrl-group{display:flex;flex-direction:column;gap:4px}
 .ctrl-group label{font-size:12px;font-weight:700;color:#555}
 .ctrl-row{display:flex;align-items:center;gap:8px}
-.ctrl-row input[type=range]{accent-color:var(--ml2);width:130px}
-.ctrl-val{font-weight:700;color:var(--ml2);min-width:36px;font-size:13px}
+.ctrl-row input[type=range]{accent-color:var(--ml2);width:140px}
+.ctrl-val{font-weight:700;color:var(--ml2);min-width:40px;font-size:13px}
 .ctrl-hint{font-size:11px;color:#aaa;margin-top:2px}
-select.ctrl-sel{border:1px solid var(--border);border-radius:6px;padding:5px 8px;
-  font-size:12px;background:#fff;color:var(--text);cursor:pointer}
 .btn-rerender{background:linear-gradient(135deg,#fff159,#f5a623);color:#333;border:none;
   border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;
   display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
 .btn-rerender:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.12)}
 .btn-rerender:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+/* ── LABEL WRAP (crop container) ── */
+.label-wrap{overflow:hidden;position:relative;background:#fff;width:100%}
 
 /* ── GLOBAL ACTIONS ── */
 .gactions{display:flex;gap:10px;justify-content:center;padding:16px 0 10px;flex-wrap:wrap}
@@ -163,37 +164,38 @@ select.ctrl-sel{border:1px solid var(--border);border-radius:6px;padding:5px 8px
 
   <div class="st" id="st"></div>
 
-  <!-- Controles de tamanho da etiqueta -->
+  <!-- Controles de exibição da etiqueta (igual Shopee) -->
   <div class="ctrl-card" id="ctrl-card">
-    <div class="ctrl-title">⚙️ Ajuste de Tamanho da Etiqueta de Envio</div>
+    <div class="ctrl-title">⚙️ Ajuste de Exibição da Etiqueta</div>
     <div class="ctrl-grid">
       <div class="ctrl-group">
-        <label>Largura</label>
+        <label>Escala</label>
         <div class="ctrl-row">
-          <input type="range" id="lbl-w" min="2" max="8" step="0.5" value="4"
-            oninput="updateCtrlVal('lbl-w-val',this.value)">
-          <span id="lbl-w-val" class="ctrl-val">4"</span>
+          <input type="range" id="img-scale" min="40" max="130" step="5" value="100"
+            oninput="updateCtrlVal('img-scale-val',this.value+'%');applyDisplay()">
+          <span id="img-scale-val" class="ctrl-val">100%</span>
         </div>
-        <div class="ctrl-hint">polegadas (padrão: 4")</div>
+        <div class="ctrl-hint">zoom da etiqueta na tela</div>
       </div>
       <div class="ctrl-group">
-        <label>Altura</label>
+        <label>Cortar Topo</label>
         <div class="ctrl-row">
-          <input type="range" id="lbl-h" min="4" max="14" step="0.5" value="8"
-            oninput="updateCtrlVal('lbl-h-val',this.value)">
-          <span id="lbl-h-val" class="ctrl-val">8"</span>
+          <input type="range" id="img-top" min="0" max="55" step="1" value="0"
+            oninput="updateCtrlVal('img-top-val',this.value+'%');applyDisplay()">
+          <span id="img-top-val" class="ctrl-val">0%</span>
         </div>
-        <div class="ctrl-hint">polegadas (padrão: 8")</div>
+        <div class="ctrl-hint">⬆ remove espaço branco do topo</div>
       </div>
       <div class="ctrl-group">
-        <label>Resolução</label>
-        <select class="ctrl-sel" id="lbl-dpmm">
-          <option value="8">8 dpmm — 203 DPI</option>
-          <option value="12">12 dpmm — 300 DPI</option>
-          <option value="24">24 dpmm — 600 DPI</option>
-        </select>
+        <label>Cortar Rodapé</label>
+        <div class="ctrl-row">
+          <input type="range" id="img-bot" min="0" max="55" step="1" value="0"
+            oninput="updateCtrlVal('img-bot-val',this.value+'%');applyDisplay()">
+          <span id="img-bot-val" class="ctrl-val">0%</span>
+        </div>
+        <div class="ctrl-hint">⬇ remove espaço branco do rodapé</div>
       </div>
-      <button class="btn-rerender" id="btn-rerender" onclick="rerender()">🔄 Re-renderizar</button>
+      <button class="btn-rerender" id="btn-rerender" onclick="rerender()">🔄 Recarregar Etiquetas</button>
     </div>
   </div>
 
@@ -449,42 +451,70 @@ function matchControle(orders, controle) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  LABEL PARAMS FROM CONTROLS
+//  DISPLAY CONTROLS (crop / scale — like Shopee tool)
 // ═══════════════════════════════════════════════════════════════
-function getLabelParams() {
-  return {
-    w: parseFloat(document.getElementById('lbl-w')?.value || 4),
-    h: parseFloat(document.getElementById('lbl-h')?.value || 8),
-    dpmm: parseInt(document.getElementById('lbl-dpmm')?.value || 8)
-  };
+function applyDisplay() {
+  const scale = parseInt(document.getElementById('img-scale')?.value || 100) / 100;
+  const cropTop = parseInt(document.getElementById('img-top')?.value || 0) / 100;
+  const cropBot = parseInt(document.getElementById('img-bot')?.value || 0) / 100;
+
+  document.querySelectorAll('.label-wrap').forEach(wrap => {
+    const img = wrap.querySelector('.label-img');
+    if (!img) return;
+
+    const applyNow = () => {
+      const natW = img.naturalWidth || 1;
+      const natH = img.naturalHeight || 1;
+      const aspect = natH / natW;
+      const containerW = wrap.offsetWidth || wrap.parentElement?.offsetWidth || 600;
+
+      // Full image height when rendered at containerW * scale
+      const scaledH = containerW * scale * aspect;
+      const topPx   = Math.round(scaledH * cropTop);
+      const visibleH = Math.max(40, Math.round(scaledH * (1 - cropTop - cropBot)));
+
+      wrap.style.height   = visibleH + 'px';
+      wrap.style.overflow = 'hidden';
+      img.style.width     = (scale * 100) + '%';
+      img.style.height    = 'auto';
+      img.style.display   = 'block';
+      img.style.marginTop = -topPx + 'px';
+    };
+
+    if (img.naturalWidth) applyNow();
+    else img.addEventListener('load', applyNow, { once: true });
+  });
 }
 
+// Recarrega etiquetas via Labelary com defaults fixos
 async function rerender() {
   if (!orders.length) return;
   const btn = document.getElementById('btn-rerender');
   btn.disabled = true;
-  btn.textContent = '⏳ Renderizando…';
-  const p = getLabelParams();
+  btn.textContent = '⏳ Recarregando…';
 
   for (let idx = 0; idx < orders.length; idx++) {
     const o = orders[idx];
-    const url = await renderZPL(o.shipping.raw, p.w, p.h, p.dpmm);
+    const url = await renderZPL(o.shipping.raw);
     if (url) {
       o.shippingUrl = url;
       const img = document.querySelector(`#order-${idx} .label-img`);
-      if (img) img.src = url;
-      // Also update print URL stored in onclick
-      const printBtn = document.querySelector(`#order-${idx} .btn-ml`);
+      if (img) {
+        img.src = url;
+        img.onload = applyDisplay;
+      }
     }
   }
 
   btn.disabled = false;
-  btn.innerHTML = '🔄 Re-renderizar';
+  btn.innerHTML = '🔄 Recarregar Etiquetas';
+  applyDisplay();
 }
 
 // ═══════════════════════════════════════════════════════════════
 //  LABELARY RENDERING
 // ═══════════════════════════════════════════════════════════════
+// Labelary com defaults fixos — controle visual feito via applyDisplay()
 async function renderZPL(zpl, width = 4, height = 8, dpmm = 8) {
   try {
     const res = await fetch(
@@ -547,9 +577,6 @@ async function renderOrders() {
   // Show controls card
   document.getElementById('ctrl-card').classList.add('show');
 
-  // Get label params from controls
-  const p = getLabelParams();
-
   for (let idx = 0; idx < orders.length; idx++) {
     const o = orders[idx];
     const { info, controle: ctrl, danfeInfo } = o;
@@ -608,13 +635,15 @@ async function renderOrders() {
 
     container.appendChild(card);
 
-    // Render shipping label via Labelary using control params
-    const shippingUrl = await renderZPL(o.shipping.raw, p.w, p.h, p.dpmm);
+    // Render shipping label via Labelary (defaults fixos 4x8in 8dpmm)
+    const shippingUrl = await renderZPL(o.shipping.raw);
     const sl = document.getElementById(`sl-${idx}`);
     if (shippingUrl) {
       o.shippingUrl = shippingUrl;
-      sl.outerHTML = `<img class="label-img" src="${shippingUrl}" alt="Etiqueta de envio"
-        onclick="dlImg('${shippingUrl}','envio-pedido${idx+1}.png')" title="Clique para baixar PNG">`;
+      sl.outerHTML = `<div class="label-wrap"><img class="label-img" src="${shippingUrl}"
+        alt="Etiqueta de envio" onload="applyDisplay()"
+        onclick="dlImg('${shippingUrl}','envio-pedido${idx+1}.png')"
+        title="Clique para baixar PNG"></div>`;
     } else {
       sl.innerHTML = '⚠️ Preview indisponível — Labelary offline. Use o arquivo ZPL.';
     }
@@ -741,37 +770,4 @@ async function processAll() {
     }
     await renderOrders();
   } catch(e) {
-    setSt('Erro: ' + e.message, 'err');
-    console.error(e);
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  EVENT LISTENERS
-// ═══════════════════════════════════════════════════════════════
-document.getElementById('tf').addEventListener('change', e => {
-  if (e.target.files[0]) handleTXT(e.target.files[0]);
-});
-document.getElementById('pf').addEventListener('change', e => {
-  if (e.target.files[0]) handlePDF(e.target.files[0]);
-});
-
-function setupDrop(zoneId, handler) {
-  const zone = document.getElementById(zoneId);
-  ['dragover','dragleave','drop'].forEach(ev => {
-    zone.addEventListener(ev, e => {
-      e.preventDefault();
-      if (ev === 'dragover') zone.classList.add('drag');
-      if (ev === 'dragleave') zone.classList.remove('drag');
-      if (ev === 'drop' && e.dataTransfer.files[0]) {
-        zone.classList.remove('drag');
-        handler(e.dataTransfer.files[0]);
-      }
-    });
-  });
-}
-setupDrop('tz', handleTXT);
-setupDrop('pz', handlePDF);
-</script>
-</body>
-</html>
+    setSt('Erro: ' + e.mess
