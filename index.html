@@ -370,65 +370,94 @@ async function parseControlePDF(file) {
     const page = await pdf.getPage(1);
     const content = await page.getTextContent();
 
-    // Items with position
+    // Items with position — normalise fi/fl ligatures (common OCR artifact in ML PDFs)
     const items = content.items
-      .map(i => ({ str: i.str.trim(), x: Math.round(i.transform[4]), y: Math.round(i.transform[5]) }))
+      .map(i => ({
+        str: i.str.trim()
+               .replace(/ﬁ/g, 'fi').replace(/ﬂ/g, 'fl')
+               .replace(/ﬀ/g, 'ff').replace(/ﬃ/g, 'ffi'),
+        x: Math.round(i.transform[4]),
+        y: Math.round(i.transform[5])
+      }))
       .filter(i => i.str.length > 0);
 
     // Sort top→bottom then left→right
     items.sort((a, b) => b.y - a.y || a.x - b.x);
-    const lines = items.map(i => i.str);
 
     // Determine page midX for column separation
     const xs = items.map(i => i.x);
     const minX = Math.min(...xs), maxX = Math.max(...xs);
-    const midX = minX + (maxX - minX) * 0.45; // left column ends around 45% of page
+    const midX = minX + (maxX - minX) * 0.45;
 
-    // Left column: order identification
-    const leftItems = items.filter(i => i.x <= midX);
-    // Right column: product names
-    const rightItems = items.filter(i => i.x > midX);
+    const leftItems  = items.filter(i => i.x <= midX);
+    const rightItems = items.filter(i => i.x >  midX);
 
-    // Parse orders from left column
+    // Group right-column items by y-bucket (5pt tolerance).
+    // Handles PDFs where each word is a separate text item — they all get joined.
+    const YBKT = 5;
+    const rightByY = {};
+    for (const item of rightItems) {
+      const yk = Math.round(item.y / YBKT) * YBKT;
+      if (!rightByY[yk]) rightByY[yk] = [];
+      rightByY[yk].push(item.str);
+    }
+
+    // Return right-column text at a given y (±1 bucket tolerance)
+    const getRightAt = y => {
+      const yk = Math.round(y / YBKT) * YBKT;
+      for (const d of [0, YBKT, -YBKT]) {
+        const arr = rightByY[yk + d];
+        if (arr && arr.length) return arr.join(' ');
+      }
+      return '';
+    };
+
+    // UUID pattern: allow 'fi'/'fl' ligature artifacts → 8–10 chars before first hyphen
+    const UUID_RE = /^[a-f0-9i]{8,10}-[a-f0-9i]{4,6}-/i;
+
     const result = [];
     const leftLines = leftItems.map(i => i.str);
 
-    for (let i = 0; i < leftLines.length; i++) {
-      // UUID anchor: e.g. f56751ce-519f-50cd-9cd0-63945436afb7
-      if (/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}/i.test(leftLines[i])) {
-        const o = { uuid: leftLines[i], packId: '', venda: '', customer: '', sku: '', qty: '', color: '', product: '' };
-        for (let j = i + 1; j < Math.min(i + 15, leftLines.length); j++) {
-          const s = leftLines[j];
-          if (/^[a-f0-9]{8}-[a-f0-9]{4}/i.test(s)) break;
-          if (/^Pack\s*ID:/i.test(s))     { o.packId   = s.replace(/^Pack\s*ID:\s*/i, '').trim(); }
-          else if (/^Venda:/i.test(s))    { o.venda    = s.replace(/^Venda:\s*/i, '').trim(); }
-          else if (/^SKU:/i.test(s))      { o.sku      = s.replace(/^SKU:\s*/i, '').trim(); }
-          else if (/^Quantidade:/i.test(s)){ o.qty     = s.replace(/^Quantidade:\s*/i, '').trim(); }
-          else if (/^Cor:/i.test(s))      { o.color    = s.replace(/^Cor:\s*/i, '').trim(); }
-          else if (!o.customer && s.length > 3 &&
-            !/^(Identificação|Produtos|Despachem|mercado)/i.test(s)) {
-            o.customer = s;
+    for (let i = 0; i < leftItems.length; i++) {
+      if (!UUID_RE.test(leftLines[i])) continue;
+
+      const uuidY = leftItems[i].y;
+      const o = { uuid: leftLines[i], packId: '', venda: '', customer: '',
+                  sku: '', qty: '', color: '', product: '' };
+
+      for (let j = i + 1; j < Math.min(i + 15, leftItems.length); j++) {
+        const s = leftLines[j];
+        if (UUID_RE.test(s)) break;
+        if      (/^Pack\s*ID:/i.test(s))     o.packId   = s.replace(/^Pack\s*ID:\s*/i, '').trim();
+        else if (/^Venda:/i.test(s))          o.venda    = s.replace(/^Venda:\s*/i, '').trim();
+        else if (/^SKU:/i.test(s))            o.sku      = s.replace(/^SKU:\s*/i, '').trim();
+        else if (/^Quantidade:/i.test(s))     o.qty      = s.replace(/^Quantidade:\s*/i, '').trim();
+        else if (/^Cor:/i.test(s))            o.color    = s.replace(/^Cor:\s*/i, '').trim();
+        else if (!o.customer && s.length > 3 &&
+          !/^(Identif|Produtos|Despachem|mercado)/i.test(s)) o.customer = s;
+      }
+
+      // Product name: right-column text at same y-row as UUID
+      const prod = getRightAt(uuidY);
+      if (prod && !/^(SKU:|Quantidade:|Cor:|Produtos|Identif)/i.test(prod)) {
+        o.product = prod;
+      }
+
+      // SKU / qty / color may also be in right column (rows below UUID, within 40pt)
+      if (!o.sku || !o.qty) {
+        for (const [ykStr, arr] of Object.entries(rightByY)) {
+          const yk = Number(ykStr);
+          if (yk > uuidY + YBKT || yk < uuidY - 40) continue;
+          for (const s of arr) {
+            if (!o.sku   && /^SKU:/i.test(s))        o.sku   = s.replace(/^SKU:\s*/i, '').trim();
+            if (!o.qty   && /^Quantidade:/i.test(s)) o.qty   = s.replace(/^Quantidade:\s*/i, '').trim();
+            if (!o.color && /^Cor:/i.test(s))        o.color = s.replace(/^Cor:\s*/i, '').trim();
           }
         }
-        result.push(o);
       }
+
+      result.push(o);
     }
-
-    // Extract product names from right column
-    // Product names = long lines not matching field labels or headers
-    const productLines = rightItems
-      .filter(i => {
-        const s = i.str;
-        return s.length > 15 &&
-          !/^(Identificação|Produtos|SKU:|Quantidade:|Cor:|Despachem|Não demore|mercado)/i.test(s) &&
-          !/^[a-f0-9]{8}-/i.test(s);
-      })
-      .map(i => i.str);
-
-    // Assign product names to orders by index
-    result.forEach((o, idx) => {
-      o.product = productLines[idx] || '';
-    });
 
     return result;
   } catch(e) {
