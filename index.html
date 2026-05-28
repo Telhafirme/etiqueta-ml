@@ -2,200 +2,175 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Etiqueta Mercado Livre — Eleva Commerce</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEVA MerIadUT LvXe  @ËÅTciador de Etiquetas</title>
+<link rel="icon" type="image/png" href="https://static.mercadolivre.com/org-img/meli/homepage/webp/logo-meli.png">
+<style>
+  : root {
+    --bg-primary: #131b2e;
+    --bg-card: #1a253e;
+    --bg-secondary: #212d43;
+    --blue: #3178ff;
+    --blue-light: #4a8eff;
+    --yellow: #ffe700;
+    --text: #e6eaf3;
+    --text-muted: #7e8bb4;
+    --border: #2a3956;
+    --success: #00aa6c;
+    --error: #e74c3c;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    background: var(--bg-primary);
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg,#1a253e 0%,#152036 100%);
+    padding: 20px 24px;
+    border-bottom: 2px solid var(--yellow);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .logo { width: 50px; height: 50px; }
+  .header-text h1 { margin: 0; font-size: 20px; color: var(-yellow); }
+  .header-text p { margin: 2px 0 0; font-size: 12px; color: var(--text-muted); }
+  main { max-width: 1000px; margin: auto; padding: 24px; }
+  .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+  .zzi { background: var(--bg-card); border: 2px dashed var(--border); border-radius: 12px; padding: 28px; text-align: center; transition: border-color .2s, background .2s; cursor: pointer; }
+  .zzi:hover, .zzi.drag { border-color: var(--blue); background: rgba(49,120,255,0.08); }
+  .zzi.loaded { border-color: var(--success); }
+  .zzi-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .zzi-icon { font-size: 36px; margin-bottom: 8px; }
+  .zzi-sub { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+  .zzi-label { display: inline-block; cursor: pointer; }
+  .zzi-label input { display: none; }
+  .btn-upload { background: var(--blue); color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 10px; }
+  .btn-upload:hover { background: var(--blue-light); }
+  .st { display: none; padding: 14px 20px; border-radius: 8px; margin-bottom: 20px; font-size: 15px; align-items: center; gap: 8px; }
+  .st.show { display: flex; }
+  .st.info { background: rgba(49,120,255,0.1); color: var(--blue-light); border: 1px solid var(--blue); }
+  .st.ok  { background: rgba(0,170,108,0.1); color: var(--success); border: 1px solid var(--success); }
+  .st.err { background: rgba(231,76,60,0.1); color: var(--error); border: 1px solid var(--error); }
+  .sp { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.2); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .ctrl-card { display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+  .ctrl-card.show { display: block; }
+  .ctrl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 16px; }
+  .ctrl-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+  .ctrl-row { display: flex; align-items: center; gap: 8px; }
+  .ctrl-row input[type=range] { flex: 1; accent-color: var(--blue); }
+  .ctrl-val { font-size: 12px; color: var(--text); min-width: 32px; text-align: right; }
+  .ctrl-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+  .btn-rerender { background: var(--blue); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 8px; }
+  .btn-rerender:hover { background: var(--blue-light); }
+  .ocard { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+  .ohead { margin-bottom: 16px; }
+  .onum { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+  .ohead h2 { margin: 6px 0 10px; font-size: 18px; color: var(-yellow); }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 12px; font-weight: 600; margin-right: 6px; margin-bottom: 4px; }
+  .badge-route { background: rgba(49,120,255,0.15); color: var(--blue-light); border: 1px solid rgba(49,120,255,0.3); }
+  .badge-dispatch { background: rgba(255,181,0,0.1); color: #ffb500; border: 1px solid rgba(255,181,0,0.3); }
+  .lsection { margin-bottom: 20px; }
+  .lsection-hd { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-s { background: var(--success); }
+  .lload { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-muted); padding: 8px; }
+  .label-wrap { overflow: hidden; }
+  .label-img { width: 100%; display: block; cursor: pointer; }
+  .bc-section { margin: 16px 0; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; }
+  .bc-hd { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+  .bc-svg { width: 100%; max-width: 420px; height: 55px; display: block; margin: 0 auto; background: #fff; border-radius: 4px; }
+  .chave-num { font-family: monospace; font-size: 9px; color: var(--text-muted); margin-top: 4px; word-break: break-all; text-align: center; }
+  .prod-section { margin: 16px 0; padding: 14px; background: rgba(255,225,100,0.05); border: 1px solid rgba(255,225,100,0.15); border-radius: 8px; }
+  .prod-hd { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+  .prod-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .prod-meta { flex: 1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .prod-tag { font-size: 12px; background: rgba(255,255,255,0.06); padding: 3px 8px; border-radius: 6px; }
+  .prod-tag.sku { color: var(--yellow); background: rgba(255,231,0,0.1); }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .btn { padding: 8px 18px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; border: none; transition: .2s; }
+  .btn-ml { background: var(--yellow); color: #1a1a1a; }
+  .btn-ml:hover { background: #fff200; }
+  .btn-sec { background: var(--bg-secondary); color: var(-yellow); border: 1px solid var(--border); }
+  .btn-sec:hover { background: var(--border); }
+  .btn-out { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+  .btn-out:hover { color: var(-xellow); border-color: var(--text-muted); }
+  .gactions { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; }
+  @media (max-width: 600px) {
+    .upload-grid { grid-template-columns: 1fr; }
+    .ctrl-grid { grid-template-columns: 1fr; }
+  }
+</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
-<style>
-:root{
-  --ml:#fff159;--ml2:#f5a623;--bg:#f4f4f4;--card:#fff;
-  --text:#333;--muted:#777;--border:#e0e0e0;
-  --ok:#27ae60;--err:#e74c3c;--info:#2980b9;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-
-/* ── HEADER ── */
-header{background:linear-gradient(135deg,#fff159 0%,#f5a623 100%);
-  padding:22px 20px 18px;text-align:center;border-bottom:3px solid #e8990a}
-.brand{font-size:11px;font-weight:700;letter-spacing:3px;color:#333;text-transform:uppercase}
-.sub{font-size:10px;color:#555;letter-spacing:2px;margin-bottom:10px}
-header h1{font-size:21px;font-weight:700;color:#333;margin-bottom:4px}
-.desc{font-size:13px;color:#555}
-
-/* ── LAYOUT ── */
-main{max-width:780px;margin:0 auto;padding:20px}
-
-/* ── UPLOAD ── */
-.upload-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
-.uzone{border:2px dashed var(--border);border-radius:12px;padding:22px 16px;
-  text-align:center;background:var(--card);transition:all .2s;cursor:pointer;position:relative}
-.uzone:hover,.uzone.drag{border-color:var(--ml2);background:#fffdf0}
-.uzone.loaded{border-color:var(--ok);background:#f0fff4}
-.uzone .ico{font-size:30px;margin-bottom:8px}
-.uzone p{font-size:13px;color:var(--muted);line-height:1.5}
-.uzone .hint{font-size:11px;color:#aaa;margin-top:3px}
-.uzone .fname{font-size:12px;font-weight:600;color:var(--ok);margin-top:5px}
-.uzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-
-/* ── STATUS ── */
-.st{display:none;border-radius:8px;padding:11px 15px;margin-bottom:14px;font-size:13px;align-items:center;gap:8px}
-.st.show{display:flex}
-.st.info{background:#eaf4fb;border-left:4px solid var(--info);color:var(--info)}
-.st.ok{background:#eafaf1;border-left:4px solid var(--ok);color:#1e8449}
-.st.err{background:#fdedec;border-left:4px solid var(--err);color:var(--err)}
-.sp{display:inline-block;width:13px;height:13px;border:2px solid currentColor;
-  border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ── ORDER CARD ── */
-.ocard{background:var(--card);border-radius:14px;overflow:hidden;margin-bottom:22px;
-  box-shadow:0 2px 10px rgba(0,0,0,.08);border:1px solid var(--border)}
-
-.ohead{display:flex;align-items:center;gap:10px;padding:14px 16px;
-  border-bottom:1px solid var(--border);flex-wrap:wrap;background:#fafafa}
-.onum{background:linear-gradient(135deg,#fff159,#f5a623);color:#333;
-  font-weight:700;font-size:12px;padding:3px 10px;border-radius:20px;white-space:nowrap}
-.ohead h2{font-size:15px;font-weight:600;flex:1;min-width:0}
-.badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;
-  font-family:monospace;white-space:nowrap}
-.badge-route{background:#333;color:#fff}
-.badge-dispatch{background:#fff3cd;color:#856404;border:1px solid #ffc107}
-
-/* ── SHIPPING LABEL ── */
-.lsection{border-bottom:1px solid var(--border)}
-.lsection-hd{padding:8px 16px;font-size:11px;font-weight:700;color:var(--muted);
-  text-transform:uppercase;letter-spacing:.5px;background:#f7f7f7;
-  display:flex;align-items:center;gap:6px}
-.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-.dot-s{background:#27ae60}.dot-d{background:#3498db}
-.label-img{width:100%;display:block;cursor:pointer}
-.label-img:hover{opacity:.9}
-.lload{padding:36px;text-align:center;color:#bbb;font-size:12px}
-
-/* ── CHAVE / BARCODE ── */
-.bc-section{border-bottom:1px solid var(--border);padding:14px 16px;text-align:center;background:#fdfdfd}
-.bc-hd{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;
-  letter-spacing:.5px;margin-bottom:10px}
-.bc-svg{width:100%;max-width:560px;height:60px}
-.chave-num{font-family:monospace;font-size:10px;color:#888;margin-top:5px;
-  letter-spacing:1px;word-break:break-all}
-
-/* ── PRODUTO ── */
-.prod-section{border-bottom:1px solid var(--border);padding:14px 16px;background:#fffdf5}
-.prod-hd{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;
-  letter-spacing:.5px;margin-bottom:8px}
-.prod-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.4}
-.prod-meta{display:flex;flex-wrap:wrap;gap:6px}
-.prod-tag{background:#f0f0f0;border-radius:6px;padding:4px 9px;font-size:12px;color:#555}
-.prod-tag.sku{background:#fff3e0;border:1px solid #f5a623}
-.prod-tag.sku strong{color:#c0392b;font-family:monospace}
-
-/* ── ACTIONS ── */
-.actions{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;background:#fafafa}
-.btn{border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;
-  cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;line-height:1.3}
-.btn:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.12)}
-.btn-ml{background:linear-gradient(135deg,#fff159,#f5a623);color:#333}
-.btn-sec{background:#f0f0f0;color:#444}
-.btn-out{background:transparent;border:1.5px solid var(--border);color:#555}
-
-/* ── CONTROLES DE EXIBIÇÃO ── */
-.ctrl-card{background:var(--card);border-radius:12px;padding:16px 18px;margin-bottom:14px;
-  border:1px solid var(--border);box-shadow:0 1px 5px rgba(0,0,0,.05);display:none}
-.ctrl-card.show{display:block}
-.ctrl-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;
-  letter-spacing:.5px;margin-bottom:12px}
-.ctrl-grid{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:flex-end}
-.ctrl-group{display:flex;flex-direction:column;gap:4px}
-.ctrl-group label{font-size:12px;font-weight:700;color:#555}
-.ctrl-row{display:flex;align-items:center;gap:8px}
-.ctrl-row input[type=range]{accent-color:var(--ml2);width:140px}
-.ctrl-val{font-weight:700;color:var(--ml2);min-width:40px;font-size:13px}
-.ctrl-hint{font-size:11px;color:#aaa;margin-top:2px}
-.btn-rerender{background:linear-gradient(135deg,#fff159,#f5a623);color:#333;border:none;
-  border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;
-  display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
-.btn-rerender:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.12)}
-.btn-rerender:disabled{opacity:.6;cursor:not-allowed;transform:none}
-
-/* ── LABEL WRAP (crop container) ── */
-.label-wrap{overflow:hidden;position:relative;background:#fff;width:100%}
-
-/* ── GLOBAL ACTIONS ── */
-.gactions{display:flex;gap:10px;justify-content:center;padding:16px 0 10px;flex-wrap:wrap}
-
-/* ── PRINT ── */
-@media print{
-  header,.upload-row,.st,.actions,.gactions,.lsection-hd,.bc-hd,.prod-hd{display:none!important}
-  body{background:#fff}
-  .ocard{box-shadow:none;border:none;page-break-after:always;border-radius:0}
-}
-@media(max-width:600px){
-  .upload-row{grid-template-columns:1fr}
-}
-</style>
 </head>
 <body>
-
 <header>
-  <div class="brand">ELEVA COMMERCE</div>
-  <div class="sub">GESTÃO DE MARKETPLACES</div>
-  <h1>🏷️ Etiqueta Mercado Livre</h1>
-  <p class="desc">Carrega o <strong>.txt</strong> de envio e o <strong>Controle.pdf</strong> · 1 bloco por pedido: etiqueta + chave NF + produto</p>
+  <img class="logo" src="https://static.mercadolivre.com/org-img/meli/homepage/webp/logo-meli.png" alt="ML">
+  <div class="header-text">
+    <h1>ELEVA Mercado Livre</h1>
+    <p>Gerenciador de Etiquetas de Envio</p>
+  </div>
 </header>
 
 <main>
-  <div class="upload-row">
-    <div class="uzone" id="tz" onclick="document.getElementById('tf').click()">
-      <div class="ico">📂</div>
-      <p><strong>Arraste ou clique</strong><br>Etiqueta de envio <strong>.txt</strong></p>
-      <div class="fname" id="tfn"></div>
-      <input type="file" id="tf" accept=".txt">
+  <div class="upload-grid">
+    <div class="zzi" id="tz">
+      <div class="zzi-icon">ð</div>
+      <div class="zzi-title">Etiquetas de Envio</div>
+      <div class="zzi-sub">Arraste ou clique para anexar o arquivo .txt</div>
+      <label class="zzi-label">
+        <input type="file" id="tf" accept=".txt">
+        <button class="btn-upload" onclick="this.closest('label').querySelector('input').click()">Selecionar Arquivo</button>
+      </label>
+      <div class="zzi-sub" id="tfn"></div>
     </div>
-    <div class="uzone" id="pz" onclick="document.getElementById('pf').click()">
-      <div class="ico">📋</div>
-      <p><strong>Arraste ou clique</strong><br><strong>Controle.pdf</strong></p>
-      <p class="hint">opcional — SKU e produto</p>
-      <div class="fname" id="pfn"></div>
-      <input type="file" id="pf" accept=".pdf">
+    <div class="zzi" id="pz">
+      <div class="zzi-icon">ð¢</div>
+      <div class="zzi-title">Controle de Despacho (opcional)</div>
+      <div class="zzd-sub">Arraste ou clique para anexar o arquivo .pdf</div>
+      <label class="zzi-label">
+        <input type="file" id="pf" accept=".pdf">
+        <button class="btn-upload" onclick="this.closest('label').querySelector('input').click()">Selecionar Arquivo</button>
+      </label>
+      <div class="zzi-sub" id="pfn"></div>
     </div>
   </div>
-
-  <div class="st" id="st"></div>
-
-  <!-- Controles de exibição da etiqueta (igual Shopee) -->
+  <div id="st" class="st"></div>
   <div class="ctrl-card" id="ctrl-card">
-    <div class="ctrl-title">⚙️ Ajuste de Exibição da Etiqueta</div>
     <div class="ctrl-grid">
       <div class="ctrl-group">
-        <label>Escala</label>
+        <label>Zoom Etiqueta</label>
         <div class="ctrl-row">
-          <input type="range" id="img-scale" min="40" max="130" step="5" value="100"
+          <input type="range" id="img-scale" min="50" max="150" step="5" value="100"
             oninput="updateCtrlVal('img-scale-val',this.value+'%');applyDisplay()">
           <span id="img-scale-val" class="ctrl-val">100%</span>
         </div>
-        <div class="ctrl-hint">zoom da etiqueta na tela</div>
       </div>
       <div class="ctrl-group">
         <label>Cortar Topo</label>
         <div class="ctrl-row">
-          <input type="range" id="img-top" min="0" max="55" step="1" value="0"
+          <input type="range" id="img-top" min="0" max="50" step="1" value="0"
             oninput="updateCtrlVal('img-top-val',this.value+'%');applyDisplay()">
+          <span id="img-top-val"img-top-val',this.value+'%');applyDisplay()">
           <span id="img-top-val" class="ctrl-val">0%</span>
         </div>
-        <div class="ctrl-hint">⬆ remove espaço branco do topo</div>
+        <div class="ctrl-hint">â¬ remove espaÃ§o branco do topo</div>
       </div>
       <div class="ctrl-group">
-        <label>Cortar Rodapé</label>
+        <label>Cortar RodapÃ©</label>
         <div class="ctrl-row">
           <input type="range" id="img-bot" min="0" max="55" step="1" value="0"
             oninput="updateCtrlVal('img-bot-val',this.value+'%');applyDisplay()">
           <span id="img-bot-val" class="ctrl-val">0%</span>
         </div>
-        <div class="ctrl-hint">⬇ remove espaço branco do rodapé</div>
+        <div class="ctrl-hint">â¬ remove espaÃ§o branco do rodapÃ©</div>
       </div>
-      <button class="btn-rerender" id="btn-rerender" onclick="rerender()">🔄 Recarregar Etiquetas</button>
+      <button class="btn-rerender" id="btn-rerender" onclick="rerender()">ð Recarregar Etiquetas</button>
     </div>
   </div>
 
@@ -204,24 +179,24 @@ main{max-width:780px;margin:0 auto;padding:20px}
 </main>
 
 <script>
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 //  CONTROL HELPERS
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function updateCtrlVal(id, val) {
   var el = document.getElementById(id);
   if (el) el.textContent = val;
 }
 
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 //  STATE
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 let rawTxt = '';
 let orders = [];
 let controleData = [];
 
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 //  STATUS
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function setSt(msg, type='info') {
   const el = document.getElementById('st');
   el.className = `st show ${type}`;
@@ -229,9 +204,9 @@ function setSt(msg, type='info') {
 }
 function hideSt() { document.getElementById('st').className = 'st'; }
 
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 //  ZPL UTILITIES
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function decodeFH(s) {
   // ZPL ^FH: _XX = UTF-8 byte in hex
   try {
@@ -275,8 +250,8 @@ function groupOrders(blocks) {
   return result;
 }
 
-// ─── EXTRACT SHIPPING LABEL INFO ───────────────────────────────
-// KEY FIX: use [^\n]* instead of [^\^]* so regex spans entire line
+// âââ EXTRACT SHIPPING LABEL INFO âââââââââââââââââââââââââââââââ
+// KEY FIX: use [^\n]* instead of [^\\]* so regex spans entire line
 // and backtracks through multiple ^ commands to find the target pattern
 function extractInfo(raw) {
   const fh = decodeFH;
@@ -293,7 +268,7 @@ function extractInfo(raw) {
   const recipRaw = (rzone.match(/\^FH\^FD([^\^]+)\^FS/) || rzone.match(/(?<!\^)\^FD([^\^]+)\^FS/) || [])[1] || '';
   const recipient = fh(recipRaw).replace(/\s*\([A-Z0-9]+\)\s*$/, '');
 
-  // Address line y≈1030: ^FO30,1030^A0N,26,26^FB600,2,0,L^FH^FDEndereço...^FS
+  // Address line yâ1030: ^FO30,1030^A0N,26,26^FB600,2,0,L^FH^FDEndereÃ§o...^FS
   const addrRaw = (raw.match(/\^FO30,1030[^\n]*\^FH\^FD([^\^]+)\^FS/) || [])[1] || '';
   const address = fh(addrRaw).replace(/^Endere.{1,3}o:\s*/i, '').trim();
 
@@ -321,7 +296,7 @@ function extractInfo(raw) {
 
   // Full route string
   const route = (fh(routeRaw).replace(/\s*>\s*$/, '').trim() + (sector ? ' ' + sector : ''))
-    .replace(/>/g, '→').trim();
+    .replace(/>/g, 'â').trim();
 
   // Date + NF: ^FDSAB 09/05/2026    NF: 69^FS
   const dateNFRaw = (raw.match(/\^FD((?:SAB|DOM|SEG|TER|QUA|QUI|SEX)\s+\d+\/\d+\/\d+[^\^]*NF:\s*\d+)/) || [])[1] || '';
@@ -336,7 +311,7 @@ function extractInfo(raw) {
            cluster, dest, channel, route, nf, dateStr, dispatch };
 }
 
-// ─── EXTRACT DANFE INFO ─────────────────────────────────────────
+// âââ EXTRACT DANFE INFO âââââââââââââââââââââââââââââââââââââââââ
 function extractDANFEInfo(raw) {
   // NF number: ^FH^FDN_c3_bamero  69/Serie 2^FS
   const nfMatch = raw.match(/N_c3_bamero\s+(\d+)\/Serie\s*(\d+)/i);
@@ -349,16 +324,16 @@ function extractDANFEInfo(raw) {
   // Chave de acesso (44 digits): ^FD31260552028364000183550020000000691502373446^FS
   const chave = (raw.match(/\^FD(\d{44})\^FS/) || [])[1] || '';
 
-  // Destinatário
+  // DestinatÃ¡rio
   const destRaw = (raw.match(/DESTINATARIO:\s*([^\^]+)\^FS/) || [])[1] || '';
   const dest = destRaw.trim();
 
   return { nfNum, nfSerie, emission, chave, dest };
 }
 
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 //  PDF CONTROLE PARSING
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 async function parseControlePDF(file) {
   try {
     if (!window.pdfjsLib) return [];
@@ -375,7 +350,7 @@ async function parseControlePDF(file) {
       .map(i => ({ str: i.str.trim(), x: Math.round(i.transform[4]), y: Math.round(i.transform[5]) }))
       .filter(i => i.str.length > 0);
 
-    // Sort top→bottom then left→right
+    // Sort topâbottom then leftâright
     items.sort((a, b) => b.y - a.y || a.x - b.x);
     const lines = items.map(i => i.str);
 
@@ -406,7 +381,7 @@ async function parseControlePDF(file) {
           else if (/^Quantidade:/i.test(s)){ o.qty     = s.replace(/^Quantidade:\s*/i, '').trim(); }
           else if (/^Cor:/i.test(s))      { o.color    = s.replace(/^Cor:\s*/i, '').trim(); }
           else if (!o.customer && s.length > 3 &&
-            !/^(Identificação|Produtos|Despachem|mercado)/i.test(s)) {
+            !/^(IdentificaÃ§Ã£o|Produtos|Despachem|mercado)/i.test(s)) {
             o.customer = s;
           }
         }
@@ -420,7 +395,7 @@ async function parseControlePDF(file) {
       .filter(i => {
         const s = i.str;
         return s.length > 15 &&
-          !/^(Identificação|Produtos|SKU:|Quantidade:|Cor:|Despachem|Não demore|mercado)/i.test(s) &&
+          !/^(IdentificaÃ§Ã£o|Produtos|SKU:|Quantidade:|Cor:|Despachem|NÃ£o demore|mercado)/i.test(s) &&
           !/^[a-f0-9]{8}-/i.test(s);
       })
       .map(i => i.str);
@@ -437,9 +412,9 @@ async function parseControlePDF(file) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  MATCH CONTROLE → ORDERS
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+//  MATCH CONTROLE â ORDERS
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function matchControle(orders, controle) {
   for (const o of orders) {
     const shipNum = o.info.shipNum; // e.g. "12857803633"
@@ -450,9 +425,9 @@ function matchControle(orders, controle) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  DISPLAY CONTROLS (crop / scale — like Shopee tool)
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+//  DISPLAY CONTROLS (crop / scale â like Shopee tool)
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function applyDisplay() {
   const scale    = parseInt(document.getElementById('img-scale')?.value ?? 100) / 100;
   const cropTop  = parseInt(document.getElementById('img-top')?.value  ?? 0)   / 100;
@@ -470,15 +445,15 @@ function applyDisplay() {
       img.style.display   = 'block';
 
       if (!hasCrop) {
-        // Sem corte: remove restrições de altura
+        // Sem corte: remove restriÃ§Ãµes de altura
         wrap.style.height   = '';
         img.style.marginTop = '';
         return;
       }
 
-      // 2. Com corte: lê dimensões reais após escala ser aplicada
+      // 2. Com corte: lÃª dimensÃµes reais apÃ³s escala ser aplicada
       const imgH = img.offsetHeight || img.naturalHeight * (img.offsetWidth / (img.naturalWidth || 1));
-      if (!imgH) return; // layout ainda não pronto
+      if (!imgH) return; // layout ainda nÃ£o pronto
 
       const topPx    = Math.round(imgH * cropTop);
       const visibleH = Math.max(20, Math.round(imgH * (1 - cropTop - cropBot)));
@@ -497,7 +472,7 @@ async function rerender() {
   if (!orders.length) return;
   const btn = document.getElementById('btn-rerender');
   btn.disabled = true;
-  btn.textContent = '⏳ Recarregando…';
+  btn.textContent = 'â³ Recarregandoâ¦';
 
   for (let idx = 0; idx < orders.length; idx++) {
     const o = orders[idx];
@@ -513,13 +488,13 @@ async function rerender() {
   }
 
   btn.disabled = false;
-  btn.innerHTML = '🔄 Recarregar Etiquetas';
+  btn.innerHTML = 'ð Recarregar Etiquetas';
   applyDisplay();
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  LABELARY RENDERING  (timeout 7s para não travar a UI)
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+//  LABELARY RENDERING  (timeout 7s para nÃ£o travar a UI)
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 async function renderZPL(zpl, width = 4, height = 8, dpmm = 8) {
   try {
     const ctrl = new AbortController();
@@ -540,9 +515,9 @@ async function renderZPL(zpl, width = 4, height = 8, dpmm = 8) {
   } catch { return null; }
 }
 
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 //  DOWNLOAD HELPERS
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function dlFile(content, filename) {
   const blob = new Blob([content], { type: 'text/plain' });
   const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: filename });
@@ -553,9 +528,9 @@ function dlImg(src, filename) {
   Object.assign(document.createElement('a'), { href: src, download: filename }).click();
 }
 
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 //  RENDER BARCODE (JsBarcode)
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderBarcode(selector, value) {
   if (!value || !window.JsBarcode) return;
   try {
@@ -571,9 +546,9 @@ function renderBarcode(selector, value) {
   } catch(e) { console.warn('Barcode error:', e); }
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  UI RENDERING  — cards aparecem imediatamente, imagens em paralelo
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+//  UI RENDERING  â cards aparecem imediatamente, imagens em paralelo
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 async function renderOrders() {
   const container = document.getElementById('orders');
   const ga = document.getElementById('ga');
@@ -582,23 +557,23 @@ async function renderOrders() {
   if (!orders.length) return;
 
   document.getElementById('ctrl-card').classList.add('show');
-  setSt(`${orders.length} pedido(s) encontrado(s). Carregando etiquetas…`, 'info');
+  setSt(`${orders.length} pedido(s) encontrado(s). Carregando etiquetasâ¦`, 'info');
 
-  // ── 1. Cria todos os cards IMEDIATAMENTE (sem aguardar Labelary) ──
+  // ââ 1. Cria todos os cards IMEDIATAMENTE (sem aguardar Labelary) ââ
   orders.forEach((o, idx) => {
     const { info, controle: ctrl, danfeInfo } = o;
     const chave = danfeInfo?.chave || '';
     const recipientDisplay = info.recipient || ctrl?.customer || `Pedido ${idx + 1}`;
     const routeBadge = (info.cluster && info.dest)
-      ? `<span class="badge badge-route">${info.cluster} → ${info.dest}</span>` : '';
+      ? `<span class="badge badge-route">${info.cluster} â ${info.dest}</span>` : '';
     const dispBadge = info.dispatch
-      ? `<span class="badge badge-dispatch">⏰ ${info.dispatch}</span>` : '';
+      ? `<span class="badge badge-dispatch">â° ${info.dispatch}</span>` : '';
 
     const hasProd = ctrl && (ctrl.product || ctrl.sku);
     const prodHtml = hasProd ? `
       <div class="prod-section">
-        <div class="prod-hd">📦 Produto</div>
-        ${ctrl.product ? `<div class="prod-name">${ctrl.product}</div>` : ''}
+        <div class="prod-hd">ð¦ Produto</div>
+        ${ctrl.product ? `<div cl!ss="prod-name">${ctrl.product}</div>` : ''}
         <div class="prod-meta">
           ${ctrl.sku   ? `<span class="prod-tag sku">SKU: <strong>${ctrl.sku}</strong></span>` : ''}
           ${ctrl.qty   ? `<span class="prod-tag">Qtd: <strong>${ctrl.qty}</strong></span>` : ''}
@@ -625,29 +600,29 @@ async function renderOrders() {
       </div>
       <div class="lsection">
         <div class="lsection-hd"><span class="dot dot-s"></span> Etiqueta de Envio</div>
-        <div class="lload" id="sl-${idx}"><span class="sp"></span> Aguardando Labelary…</div>
+        <div class="lload" id="sl-${idx}"><span class="sp"></span> Aguardando Labelaryâ¦</div>
       </div>
       ${bcHtml}
       ${prodHtml}
       <div class="actions">
-        <button class="btn btn-ml" onclick="printOrder(${idx})">🖨️ Imprimir</button>
-        <button class="btn btn-sec" onclick="dlFile(orders[${idx}].shipping.raw,'envio-pedido${idx+1}.txt')">⬇ TXT Envio</button>
-        ${o.danfe ? `<button class="btn btn-sec" onclick="dlFile(orders[${idx}].danfe.raw,'danfe-pedido${idx+1}.txt')">⬇ TXT DANFE</button>` : ''}
-        <button class="btn btn-out" onclick="dlFile(orders[${idx}].shipping.raw+(orders[${idx}].danfe?orders[${idx}].danfe.raw:''),'pedido${idx+1}-completo.txt')">⬇ TXT Completo</button>
+        <button class="btn btn-ml" onclick="printOrder(${idx})">ð¨ï¸ Imprimir</button>
+        <button class="btn btn-sec" onclick="dlFile(orders[${idx}].shipping.raw,'envio-pedido${idx+1}.txt')">â¬ TXT Envio</button>
+        ${o.danfe ? `<button class="btn btn-sec" onclick="dlFile(orders[${idx}].danfe.raw,'danfe-pedido${idx+1}.txt')">â¬ TXT DANFE</button>` : ''}
+        <button class="btn btn-out" onclick="dlFile(orders[${idx}].shipping.raw+(orders[${idx}].danfe?orders[${idx}].danfe.raw:''),'pedido${idx+1}-completo.txt')">â¬ TXT Completo</button>
       </div>`;
     container.appendChild(card);
 
     if (chave) renderBarcode(`#bc-${idx}`, chave);
   });
 
-  // ── 2. Acoes globais imediatas ──
+  // ââ 2. Acoes globais imediatas ââ
   ga.innerHTML = `
-    <button class="btn btn-ml" onclick="printAll()">🖨️ Imprimir todos</button>
-    <button class="btn btn-sec" onclick="dlAllZPL()">⬇ Baixar todos (.txt)</button>`;
+    <button class="btn btn-ml" onclick="printAll()">ð¨ï¸ Imprimir todos</button>
+    <button class="btn btn-sec" onclick="dlAllZPL()">â¬ Baixar todos (.txt)</button>`;
 
-  setSt(`✅ ${orders.length} pedido(s) carregado(s). Buscando imagens…`, 'ok');
+  setSt(`â ${orders.length} pedido(s) carregado(s). Buscando imagensâ¦`, 'ok');
 
-  // ── 3. Busca todas as imagens EM PARALELO (cada uma com timeout 7s) ──
+  // ââ 3. Busca todas as imagens EM PARALELO (cada uma com timeout 7s) ââ
   let imgOk = 0;
   await Promise.all(orders.map(async (o, idx) => {
     const url = await renderZPL(o.shipping.raw);
@@ -661,20 +636,20 @@ async function renderOrders() {
         onclick="dlImg('${url}','envio-pedido${idx+1}.png')"
         title="Clique para baixar PNG"></div>`;
     } else {
-      sl.innerHTML = '<span style="color:#e74c3c;font-size:12px">⚠️ Labelary indisponível — use ⬇ TXT Envio para imprimir.</span>';
+      sl.innerHTML = '<span style="color:#e74c3c;font-size:12px">â ï¸ Labelary indisponÃ­vel â use â¬ TXT Envio para imprimir.</span>';
     }
   }));
 
   if (imgOk > 0) applyDisplay();
   const msg = imgOk === orders.length
-    ? `✅ ${orders.length} pedido(s) prontos`
-    : `✅ ${orders.length} pedido(s) — ${imgOk} etiqueta(s) carregada(s) (${orders.length - imgOk} indisponível via Labelary)`;
+    ? `â ${orders.length} pedido(s) prontos`
+    : `â ${orders.length} pedido(s) â ${imgOk} etiqueta(s) carregada(s) (${orders.length - imgOk} indisponÃ­vel via Labelary)`;
   setSt(msg, 'ok');
 }
 
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 //  PRINT
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function buildPrintHTML(orderList) {
   let html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"><\/script>
@@ -744,9 +719,9 @@ function dlAllZPL() {
   dlFile(all, 'ml-etiquetas-completo.txt');
 }
 
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 //  FILE HANDLERS
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 async function handleTXT(file) {
   document.getElementById('tfn').textContent = file.name;
   document.getElementById('tz').classList.add('loaded');
@@ -757,11 +732,61 @@ async function handleTXT(file) {
 async function handlePDF(file) {
   document.getElementById('pfn').textContent = file.name;
   document.getElementById('pz').classList.add('loaded');
-  setSt('Lendo PDF Controle…', 'info');
+  setSt('Lendo PDF Controleâ¦', 'info');
   controleData = await parseControlePDF(file);
   console.log('Controle parsed:', controleData);
   if (rawTxt) await processAll();
 }
 
 async function processAll() {
-  i
+  if (!rawTxt) return;
+  setSt('Processando ZPLâ¦', 'info');
+  try {
+    const blocks = parseZPLBlocks(rawTxt);
+    console.log('ZPL blocks found:', blocks.length, blocks.map(b => ({isShipping: b.isShipping, isDANFE: b.isDANFE})));
+    orders = groupOrders(blocks);
+    console.log('Orders grouped:', orders.length, orders.map(o => o.info));
+    if (!orders.length) {
+      setSt('Nenhum bloco ZPL reconhecido. Verifique o arquivo .txt.', 'err');
+      return;
+    }
+    if (controleData.length) {
+      matchControle(orders, controleData);
+      console.log('Controle matched:', orders.map(o => o.controle));
+    }
+    await renderOrders();
+  } catch(e) {
+    setSt('Erro: ' + e.message, 'err');
+    console.error(e);
+  }
+}
+
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+//  EVENT LISTENERS
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+document.getElementById('tf').addEventListener('change', e => {
+  if (e.target.files[0]) handleTXT(e.target.files[0]);
+});
+document.getElementById('pf').addEventListener('change', e => {
+  if (e.target.files[0]) handlePDF(e.target.files[0]);
+});
+
+function setupDrop(zoneId, handler) {
+  const zone = document.getElementById(zoneId);
+  ['dragover','dragleave','drop'].forEach(ev => {
+    zone.addEventListener(ev, e => {
+      e.preventDefault();
+      if (ev === 'dragover') zone.classList.add('drag');
+      if (ev === 'dragleave') zone.classList.remove('drag');
+      if (ev === 'drop' && e.dataTransfer.files[0]) {
+        zone.classList.remove('drag');
+        handler(e.dataTransfer.files[0]);
+      }
+    });
+  });
+}
+setupDrop('tz', handleTXT);
+setupDrop('pz', handlePDF);
+</script>
+</body>
+</html>
