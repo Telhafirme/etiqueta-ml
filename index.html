@@ -100,6 +100,27 @@ main{max-width:780px;margin:0 auto;padding:20px}
 .btn-sec{background:#f0f0f0;color:#444}
 .btn-out{background:transparent;border:1.5px solid var(--border);color:#555}
 
+/* ── CONTROLES DE TAMANHO ── */
+.ctrl-card{background:var(--card);border-radius:12px;padding:16px 18px;margin-bottom:14px;
+  border:1px solid var(--border);box-shadow:0 1px 5px rgba(0,0,0,.05);display:none}
+.ctrl-card.show{display:block}
+.ctrl-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:12px}
+.ctrl-grid{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:flex-end}
+.ctrl-group{display:flex;flex-direction:column;gap:4px}
+.ctrl-group label{font-size:12px;font-weight:700;color:#555}
+.ctrl-row{display:flex;align-items:center;gap:8px}
+.ctrl-row input[type=range]{accent-color:var(--ml2);width:130px}
+.ctrl-val{font-weight:700;color:var(--ml2);min-width:36px;font-size:13px}
+.ctrl-hint{font-size:11px;color:#aaa;margin-top:2px}
+select.ctrl-sel{border:1px solid var(--border);border-radius:6px;padding:5px 8px;
+  font-size:12px;background:#fff;color:var(--text);cursor:pointer}
+.btn-rerender{background:linear-gradient(135deg,#fff159,#f5a623);color:#333;border:none;
+  border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
+.btn-rerender:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.12)}
+.btn-rerender:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
 /* ── GLOBAL ACTIONS ── */
 .gactions{display:flex;gap:10px;justify-content:center;padding:16px 0 10px;flex-wrap:wrap}
 
@@ -141,6 +162,41 @@ main{max-width:780px;margin:0 auto;padding:20px}
   </div>
 
   <div class="st" id="st"></div>
+
+  <!-- Controles de tamanho da etiqueta -->
+  <div class="ctrl-card" id="ctrl-card">
+    <div class="ctrl-title">⚙️ Ajuste de Tamanho da Etiqueta de Envio</div>
+    <div class="ctrl-grid">
+      <div class="ctrl-group">
+        <label>Largura</label>
+        <div class="ctrl-row">
+          <input type="range" id="lbl-w" min="2" max="8" step="0.5" value="4"
+            oninput="document.getElementById('lbl-w-val').textContent=this.value+'&quot;'">
+          <span id="lbl-w-val" class="ctrl-val">4"</span>
+        </div>
+        <div class="ctrl-hint">polegadas (padrão: 4")</div>
+      </div>
+      <div class="ctrl-group">
+        <label>Altura</label>
+        <div class="ctrl-row">
+          <input type="range" id="lbl-h" min="4" max="14" step="0.5" value="8"
+            oninput="document.getElementById('lbl-h-val').textContent=this.value+'&quot;'">
+          <span id="lbl-h-val" class="ctrl-val">8"</span>
+        </div>
+        <div class="ctrl-hint">polegadas (padrão: 8")</div>
+      </div>
+      <div class="ctrl-group">
+        <label>Resolução</label>
+        <select class="ctrl-sel" id="lbl-dpmm">
+          <option value="8">8 dpmm — 203 DPI</option>
+          <option value="12">12 dpmm — 300 DPI</option>
+          <option value="24">24 dpmm — 600 DPI</option>
+        </select>
+      </div>
+      <button class="btn-rerender" id="btn-rerender" onclick="rerender()">🔄 Re-renderizar</button>
+    </div>
+  </div>
+
   <div id="orders"></div>
   <div class="gactions" id="ga"></div>
 </main>
@@ -385,6 +441,40 @@ function matchControle(orders, controle) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  LABEL PARAMS FROM CONTROLS
+// ═══════════════════════════════════════════════════════════════
+function getLabelParams() {
+  return {
+    w: parseFloat(document.getElementById('lbl-w')?.value || 4),
+    h: parseFloat(document.getElementById('lbl-h')?.value || 8),
+    dpmm: parseInt(document.getElementById('lbl-dpmm')?.value || 8)
+  };
+}
+
+async function rerender() {
+  if (!orders.length) return;
+  const btn = document.getElementById('btn-rerender');
+  btn.disabled = true;
+  btn.textContent = '⏳ Renderizando…';
+  const p = getLabelParams();
+
+  for (let idx = 0; idx < orders.length; idx++) {
+    const o = orders[idx];
+    const url = await renderZPL(o.shipping.raw, p.w, p.h, p.dpmm);
+    if (url) {
+      o.shippingUrl = url;
+      const img = document.querySelector(`#order-${idx} .label-img`);
+      if (img) img.src = url;
+      // Also update print URL stored in onclick
+      const printBtn = document.querySelector(`#order-${idx} .btn-ml`);
+    }
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '🔄 Re-renderizar';
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  LABELARY RENDERING
 // ═══════════════════════════════════════════════════════════════
 async function renderZPL(zpl, width = 4, height = 8, dpmm = 8) {
@@ -446,6 +536,12 @@ async function renderOrders() {
 
   setSt(`Renderizando ${orders.length} pedido(s) via Labelary…`, 'info');
 
+  // Show controls card
+  document.getElementById('ctrl-card').classList.add('show');
+
+  // Get label params from controls
+  const p = getLabelParams();
+
   for (let idx = 0; idx < orders.length; idx++) {
     const o = orders[idx];
     const { info, controle: ctrl, danfeInfo } = o;
@@ -504,8 +600,8 @@ async function renderOrders() {
 
     container.appendChild(card);
 
-    // Render shipping label via Labelary
-    const shippingUrl = await renderZPL(o.shipping.raw, 4, 8, 8);
+    // Render shipping label via Labelary using control params
+    const shippingUrl = await renderZPL(o.shipping.raw, p.w, p.h, p.dpmm);
     const sl = document.getElementById(`sl-${idx}`);
     if (shippingUrl) {
       o.shippingUrl = shippingUrl;
@@ -555,119 +651,4 @@ function buildPrintHTML(orderList) {
     if (chave) {
       html += `<div class="bc-wrap">
         <svg id="${bcId}" class="bc-print"></svg>
-        <div class="bc-num">${chave}</div>
-      </div>`;
-    }
-    if (ctrl && (ctrl.product || ctrl.sku)) {
-      html += `<div class="prod-wrap">
-        ${ctrl.product ? `<div class="prod-name">${ctrl.product}</div>` : ''}
-        <div class="prod-meta">
-          ${ctrl.sku ? `SKU: <strong>${ctrl.sku}</strong>` : ''}
-          ${ctrl.qty ? ` &nbsp;|&nbsp; Qtd: <strong>${ctrl.qty}</strong>` : ''}
-          ${ctrl.color ? ` &nbsp;|&nbsp; Cor: <strong>${ctrl.color}</strong>` : ''}
-        </div>
-      </div>`;
-    }
-    html += `</div>`;
-  });
-
-  // Inline barcode init script
-  const chaves = orderList.map(o => o.danfeInfo?.chave || '');
-  html += `<script>
-    window.addEventListener('load', function() {
-      ${chaves.map((c, i) => c ? `try{JsBarcode('#pbc-${i}','${c}',{format:'CODE128',displayValue:false,width:1.4,height:55,margin:0});}catch(e){}` : '').join('\n')}
-      setTimeout(function(){ window.print(); }, 400);
-    });
-  <\/script></body></html>`;
-  return html;
-}
-
-function printOrder(idx) {
-  const w = window.open('', '_blank', 'width=600,height=800');
-  w.document.write(buildPrintHTML([orders[idx]]));
-  w.document.close();
-}
-
-function printAll() {
-  const w = window.open('', '_blank', 'width=600,height=800');
-  w.document.write(buildPrintHTML(orders));
-  w.document.close();
-}
-
-function dlAllZPL() {
-  let all = '';
-  orders.forEach(o => { all += o.shipping.raw; if (o.danfe) all += o.danfe.raw; });
-  dlFile(all, 'ml-etiquetas-completo.txt');
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  FILE HANDLERS
-// ═══════════════════════════════════════════════════════════════
-async function handleTXT(file) {
-  document.getElementById('tfn').textContent = file.name;
-  document.getElementById('tz').classList.add('loaded');
-  rawTxt = await file.text();
-  await processAll();
-}
-
-async function handlePDF(file) {
-  document.getElementById('pfn').textContent = file.name;
-  document.getElementById('pz').classList.add('loaded');
-  setSt('Lendo PDF Controle…', 'info');
-  controleData = await parseControlePDF(file);
-  console.log('Controle parsed:', controleData);
-  if (rawTxt) await processAll();
-}
-
-async function processAll() {
-  if (!rawTxt) return;
-  setSt('Processando ZPL…', 'info');
-  try {
-    const blocks = parseZPLBlocks(rawTxt);
-    console.log('ZPL blocks found:', blocks.length, blocks.map(b => ({isShipping: b.isShipping, isDANFE: b.isDANFE})));
-    orders = groupOrders(blocks);
-    console.log('Orders grouped:', orders.length, orders.map(o => o.info));
-    if (!orders.length) {
-      setSt('Nenhum bloco ZPL reconhecido. Verifique o arquivo .txt.', 'err');
-      return;
-    }
-    if (controleData.length) {
-      matchControle(orders, controleData);
-      console.log('Controle matched:', orders.map(o => o.controle));
-    }
-    await renderOrders();
-  } catch(e) {
-    setSt('Erro: ' + e.message, 'err');
-    console.error(e);
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  EVENT LISTENERS
-// ═══════════════════════════════════════════════════════════════
-document.getElementById('tf').addEventListener('change', e => {
-  if (e.target.files[0]) handleTXT(e.target.files[0]);
-});
-document.getElementById('pf').addEventListener('change', e => {
-  if (e.target.files[0]) handlePDF(e.target.files[0]);
-});
-
-function setupDrop(zoneId, handler) {
-  const zone = document.getElementById(zoneId);
-  ['dragover','dragleave','drop'].forEach(ev => {
-    zone.addEventListener(ev, e => {
-      e.preventDefault();
-      if (ev === 'dragover') zone.classList.add('drag');
-      if (ev === 'dragleave') zone.classList.remove('drag');
-      if (ev === 'drop' && e.dataTransfer.files[0]) {
-        zone.classList.remove('drag');
-        handler(e.dataTransfer.files[0]);
-      }
-    });
-  });
-}
-setupDrop('tz', handleTXT);
-setupDrop('pz', handlePDF);
-</script>
-</body>
-</html>
+     
