@@ -209,7 +209,7 @@ main{max-width:780px;margin:0 auto;padding:20px}
 // ═══════════════════════════════════════════════════════════════
 function updateCtrlVal(id, val) {
   var el = document.getElementById(id);
-  if (el) el.textContent = val + '"';
+  if (el) el.textContent = val;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -454,34 +454,40 @@ function matchControle(orders, controle) {
 //  DISPLAY CONTROLS (crop / scale — like Shopee tool)
 // ═══════════════════════════════════════════════════════════════
 function applyDisplay() {
-  const scale = parseInt(document.getElementById('img-scale')?.value || 100) / 100;
-  const cropTop = parseInt(document.getElementById('img-top')?.value || 0) / 100;
-  const cropBot = parseInt(document.getElementById('img-bot')?.value || 0) / 100;
+  const scale    = parseInt(document.getElementById('img-scale')?.value ?? 100) / 100;
+  const cropTop  = parseInt(document.getElementById('img-top')?.value  ?? 0)   / 100;
+  const cropBot  = parseInt(document.getElementById('img-bot')?.value  ?? 0)   / 100;
+  const hasCrop  = cropTop > 0 || cropBot > 0;
 
   document.querySelectorAll('.label-wrap').forEach(wrap => {
     const img = wrap.querySelector('.label-img');
     if (!img) return;
 
     const applyNow = () => {
-      const natW = img.naturalWidth || 1;
-      const natH = img.naturalHeight || 1;
-      const aspect = natH / natW;
-      const containerW = wrap.offsetWidth || wrap.parentElement?.offsetWidth || 600;
-
-      // Full image height when rendered at containerW * scale
-      const scaledH = containerW * scale * aspect;
-      const topPx   = Math.round(scaledH * cropTop);
-      const visibleH = Math.max(40, Math.round(scaledH * (1 - cropTop - cropBot)));
-
-      wrap.style.height   = visibleH + 'px';
-      wrap.style.overflow = 'hidden';
+      // 1. Aplica escala
       img.style.width     = (scale * 100) + '%';
       img.style.height    = 'auto';
       img.style.display   = 'block';
+
+      if (!hasCrop) {
+        // Sem corte: remove restrições de altura
+        wrap.style.height   = '';
+        img.style.marginTop = '';
+        return;
+      }
+
+      // 2. Com corte: lê dimensões reais após escala ser aplicada
+      const imgH = img.offsetHeight || img.naturalHeight * (img.offsetWidth / (img.naturalWidth || 1));
+      if (!imgH) return; // layout ainda não pronto
+
+      const topPx    = Math.round(imgH * cropTop);
+      const visibleH = Math.max(20, Math.round(imgH * (1 - cropTop - cropBot)));
+
+      wrap.style.height   = visibleH + 'px';
       img.style.marginTop = -topPx + 'px';
     };
 
-    if (img.naturalWidth) applyNow();
+    if (img.complete && img.naturalWidth) applyNow();
     else img.addEventListener('load', applyNow, { once: true });
   });
 }
@@ -766,8 +772,4 @@ async function processAll() {
     }
     if (controleData.length) {
       matchControle(orders, controleData);
-      console.log('Controle matched:', orders.map(o => o.controle));
-    }
-    await renderOrders();
-  } catch(e) {
-    setSt('Erro: ' + e.mess
+      console.l
