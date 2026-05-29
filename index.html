@@ -840,3 +840,20 @@ document.getElementById('pf').addEventListener('change', e => {
 function setupDrop(zoneId, handler) {
   const zone = document.getElementById(zoneId);
  
+  ['dragover','dragleave','drop'].forEach(ev => {
+    zone.addEventListener(ev, e => {
+      e.preventDefault();
+      if (ev === 'dragover') zone.classList.add('drag');
+      if (ev === 'dragleave') zone.classList.remove('drag');
+      if (ev === 'drop' && e.dataTransfer.files[0]) {
+        zone.classList.remove('drag');
+        handler(e.dataTransfer.files[0]);
+      }
+    });
+  });
+}
+setupDrop('tz', handleTXT);
+setupDrop('pz', handlePDF);
+</script>
+</body>
+</html>
