@@ -783,20 +783,20 @@ function buildCompactZPL(order) {
   let zpl = order.shipping.raw;
   const ctrl = order.controle;
   if (ctrl && (ctrl.product || ctrl.sku)) {
-    const prodLine = ctrl.product ? ctrl.product.slice(0, 45).replace(/\^/g, '') : '';
+    const prodLine = ctrl.product ? ctrl.product.slice(0, 60).replace(/\^/g, '') : '';
     const metaParts = [
       ctrl.sku   ? 'SKU: '  + ctrl.sku   : '',
       ctrl.qty   ? 'Qtd: '  + ctrl.qty   : '',
       ctrl.color ? 'Cor: '  + ctrl.color : ''
     ].filter(Boolean).join('   ');
     let extra = '\n^FX PRODUTO\n';
-    if (prodLine)  extra += '^FO20,1150^A0N,22,22^FB760,2,0,L^FD' + prodLine  + '^FS\n';
-    if (metaParts) extra += '^FO20,1178^A0N,20,20^FB760,1,0,L^FD'  + metaParts + '^FS\n';
+    if (prodLine)  extra += '^FO20,435^A0N,22,22^FB760,2,0,L^FD' + prodLine  + '^FS\n';
+    if (metaParts) extra += '^FO20,490^A0N,20,20^FB760,1,0,L^FD' + metaParts + '^FS\n';
     zpl = zpl.replace(/\^XZ[\s]*$/, extra + '^XZ\n');
   }
-  if (order.danfe) zpl += order.danfe.raw;
   return zpl;
 }
+
 function dlAllZPL() {
   let all = '';
   orders.forEach(o => { all += buildCompactZPL(o); });
