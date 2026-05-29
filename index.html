@@ -781,19 +781,39 @@ function printAll() {
 
 function buildCompactZPL(order) {
   let zpl = order.shipping.raw;
-  const ctrl = order.controle;
-  if (ctrl && (ctrl.product || ctrl.sku)) {
-    const prodLine = ctrl.product ? ctrl.product.slice(0, 60).replace(/\^/g, '') : '';
-    const metaParts = [
-      ctrl.sku   ? 'SKU: '  + ctrl.sku   : '',
-      ctrl.qty   ? 'Qtd: '  + ctrl.qty   : '',
-      ctrl.color ? 'Cor: '  + ctrl.color : ''
-    ].filter(Boolean).join('   ');
-    let extra = '\n^FX PRODUTO\n';
-    if (prodLine)  extra += '^FO20,435^A0N,22,22^FB760,2,0,L^FD' + prodLine  + '^FS\n';
-    if (metaParts) extra += '^FO20,490^A0N,20,20^FB760,1,0,L^FD' + metaParts + '^FS\n';
-    zpl = zpl.replace(/\^XZ[\s]*$/, extra + '^XZ\n');
+  const ctrl  = order.controle;
+  const danfeRaw = order.danfe ? order.danfe.raw : '';
+
+  const prodLine = (ctrl && ctrl.product)
+    ? ctrl.product.slice(0, 60).replace(/\^/g, '') : '';
+  const metaParts = ctrl ? [
+    ctrl.sku   ? 'SKU: '  + ctrl.sku   : '',
+    ctrl.qty   ? 'Qtd: '  + ctrl.qty   : '',
+    ctrl.color ? 'Cor: '  + ctrl.color : ''
+  ].filter(Boolean).join('   ') : '';
+
+  // Extract NF access key from DANFE ZPL
+  const nfMatch = danfeRaw.match(/\^BCN,\d+,Y,N,N\^FD>;\s*(\d{40,50})/);
+  const nfKey   = nfMatch ? nfMatch[1] : '';
+
+  const hasProduct = !!(prodLine || metaParts);
+  const hasNF      = !!nfKey;
+  if (!hasProduct && !hasNF) return zpl;
+
+  // Inject AFTER recipient address area (last content ~y=1280) and separator
+  let extra = '\n^FX PRODUTO+NF\n';
+  extra += '^FO0,1290^GB810,2,2^FS\n';
+
+  if (prodLine)  extra += '^FO20,1300^A0N,22,22^FB760,2,0,L^FD' + prodLine  + '^FS\n';
+  if (metaParts) extra += '^FO20,1350^A0N,20,20^FB760,1,0,L^FD' + metaParts + '^FS\n';
+
+  if (hasNF) {
+    const yNF = hasProduct ? 1385 : 1300;
+    extra += '^FO20,' + yNF + '^A0N,18,18^FDChave NF: ' + nfKey.slice(0,22) + ' ' + nfKey.slice(22) + '^FS\n';
+    extra += '^FO20,' + (yNF + 22) + '^BY2,,0^BCN,55,Y,N,N^FD>;' + nfKey + '^FS\n';
   }
+
+  zpl = zpl.replace(/\^XZ[\s]*$/, extra + '^XZ\n');
   return zpl;
 }
 
